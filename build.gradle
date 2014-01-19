@@ -44,17 +44,22 @@ buildscript {
     }
 }
 
+// Configuration settings
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds' // Always check for new snapshots
+}
+
 // Repositories storing our dependencies
 repositories {
-    mavenCentral()
+	mavenCentral()
     maven { url "http://repo.bukkit.org/content/groups/public/" }
-    maven { url "https://repository.jboss.org/nexus/content/groups/public/" }
+    maven { url "https://oss.sonatype.org/content/repositories/public/" }
 }
 
 // Dependencies used by our project
 dependencies {
-    compile group: 'org.bukkit', name: 'bukkit', version: ext.bukkitVersion    
-    compile 'org.jboss.netty:netty:3.2.4.Final'
+    compile group: 'org.bukkit', name: 'bukkit', version: ext.bukkitVersion
+    compile 'com.flowpowered:flow-networking:0.1.0-SNAPSHOT'
     compile 'jline:jline:0.9.94' 
     compile 'org.xerial:sqlite-jdbc:3.7.2'
     compile 'mysql:mysql-connector-java:5.1.14'

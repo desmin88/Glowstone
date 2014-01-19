@@ -4,8 +4,7 @@ import net.glowstone.block.BlockProperties;
 import net.glowstone.block.GlowBlock;
 import net.glowstone.block.GlowBlockState;
 import net.glowstone.msg.CompressedChunkMessage;
-import net.glowstone.net.message.Message;
-import net.glowstone.net.message.game.ChunkDataMessage;
+import net.glowstone.net.message.play.game.ChunkDataMessage;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
@@ -449,11 +448,11 @@ public final class GlowChunk implements Chunk {
     // ======== Helper functions ========
 
     /**
-     * Creates a new {@link Message} which can be sent to a client to stream
+     * Creates a new {@link ChunkDataMessage} which can be sent to a client to stream
      * this chunk to them.
      * @return The {@link CompressedChunkMessage}.
      */
-    public Message toMessage() {
+    public ChunkDataMessage toMessage() {
         int primaryBitmask = (1 << (DEPTH / 16)) - 1; // 0xff, defines which chunks are being sent
         int addBitmask = 0; // used for extended-value chunks which are not yet supported
         boolean skylight = world.getEnvironment() == World.Environment.NORMAL;
