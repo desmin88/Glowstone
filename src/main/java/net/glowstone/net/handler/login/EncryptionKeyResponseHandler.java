@@ -3,10 +3,15 @@ package net.glowstone.net.handler.login;
 import com.flowpowered.networking.MessageHandler;
 import net.glowstone.GlowServer;
 import net.glowstone.entity.GlowPlayer;
+import net.glowstone.net.EncryptionChannelProcessor;
 import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.login.EncryptionKeyResponseMessage;
 import net.glowstone.util.SecurityUtils;
 import net.glowstone.util.UuidUtils;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -58,9 +63,12 @@ public final class EncryptionKeyResponseHandler implements MessageHandler<GlowSe
         }
 
 
+        BufferedBlockCipher cipher = SecurityUtils.generateBouncyCastleAESCipher();
+        CipherParameters symmetricKey = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
+        cipher.init(false, symmetricKey);
 
-//        message.set
-
+        EncryptionChannelProcessor processor = new EncryptionChannelProcessor(cipher, 32);
+        message.setProcessor(processor);
 
         // todo: at this point, the stream encryption should be enabled
 
