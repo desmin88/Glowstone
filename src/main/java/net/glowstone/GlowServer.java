@@ -335,7 +335,7 @@ public final class GlowServer implements Server {
         commandMap.removeAllOfType(PluginCommand.class);
 
         File folder = new File(config.getString(ServerConfig.Key.PLUGIN_FOLDER));
-        if (!folder.isDirectory() || !folder.mkdirs()) {
+        if (!folder.isDirectory() && !folder.mkdirs()) {
             logger.log(Level.SEVERE, "Could not create plugins directory: " + folder);
         }
         

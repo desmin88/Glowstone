@@ -1,7 +1,11 @@
 package net.glowstone;
 
 import com.grahamedgecombe.jterminal.JTerminal;
-import jline.*;
+import jline.console.ConsoleReader;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.Completer;
+import jline.console.completer.NullCompleter;
+import jline.console.completer.StringsCompleter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.ConsoleCommandSender;
@@ -32,28 +36,28 @@ import java.util.logging.*;
  * Portions are heavily based on CraftBukkit.
  */
 public final class ConsoleManager {
-    
+
     private GlowServer server;
-    
+
     private ConsoleReader reader;
     private ConsoleCommandSender sender;
     private ConsoleCommandThread thread;
     private FancyConsoleHandler consoleHandler;
     private RotatingFileHandler fileHandler;
-    
+
     private JFrame jFrame = null;
     private JTerminal jTerminal = null;
     private JTextField jInput = null;
-    
+
     private boolean running = true;
     private boolean jLine = false;
-    
+
     public ConsoleManager(GlowServer server, String mode) {
         this.server = server;
-        
+
         if (mode.equalsIgnoreCase("gui")) {
             JTerminalListener listener = new JTerminalListener();
-            
+
             jFrame = new JFrame("Glowstone");
             jTerminal = new JTerminal();
             jInput = new JTextField(80) {
@@ -65,11 +69,11 @@ public final class ConsoleManager {
             jInput.setForeground(Color.WHITE);
             jInput.setMargin(new Insets(0, 0, 0, 0));
             jInput.addKeyListener(listener);
-            
+
             JLabel caret = new JLabel("> ");
             caret.setFont(new Font("Monospaced", Font.PLAIN, 12));
             caret.setForeground(Color.WHITE);
-            
+
             JPanel ipanel = new JPanel();
             ipanel.add(caret, BorderLayout.WEST);
             ipanel.add(jInput, BorderLayout.EAST);
@@ -77,7 +81,7 @@ public final class ConsoleManager {
             ipanel.setBackground(Color.BLACK);
             ipanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
             ipanel.setSize(jTerminal.getWidth(), ipanel.getHeight());
-            
+
             jFrame.getContentPane().add(jTerminal, BorderLayout.NORTH);
             jFrame.getContentPane().add(ipanel, BorderLayout.SOUTH);
             jFrame.addWindowListener(listener);
@@ -90,39 +94,39 @@ public final class ConsoleManager {
         }
 
         consoleHandler = new FancyConsoleHandler();
-        
+
         String logFile = server.getLogFile();
         new File(logFile).getParentFile().mkdirs();
         fileHandler = new RotatingFileHandler(logFile);
-        
+
         consoleHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss")));
         fileHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")));
-        
+
         Logger logger = Logger.getLogger("");
         for (Handler h : logger.getHandlers()) {
             logger.removeHandler(h);
         }
         logger.addHandler(consoleHandler);
         logger.addHandler(fileHandler);
-        
+
         try {
             reader = new ConsoleReader();
         } catch (IOException ex) {
             server.getLogger().log(Level.SEVERE, "Exception initializing console reader: {0}", ex.getMessage());
             ex.printStackTrace();
         }
-        
+
         Runtime.getRuntime().addShutdownHook(new ServerShutdownThread());
 
-        
+
         System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO), true));
         System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE), true));
     }
-    
+
     public ConsoleCommandSender getSender() {
         return sender;
     }
-    
+
     public void stop() {
         consoleHandler.flush();
         fileHandler.flush();
@@ -142,43 +146,43 @@ public final class ConsoleManager {
             thread.start();
         }
     }
-    
+
     public void refreshCommands() {
-        for (Object c : new ArrayList(reader.getCompletors())) {
-            reader.removeCompletor((Completor) c);
+        for (Completer c : new ArrayList<Completer>(reader.getCompleters())) {
+            reader.removeCompleter(c);
         }
-        
-        Completor[] list = new Completor[] { new SimpleCompletor(server.getAllCommands()), new NullCompletor() };
-        reader.addCompletor(new ArgumentCompletor(list));
+
+        Completer[] list = new Completer[] { new StringsCompleter(server.getAllCommands()), new NullCompleter() };
+        reader.addCompleter(new ArgumentCompleter(list));
         sender.recalculatePermissions();
     }
-    
+
     public String colorize(String string) {
         if (!string.contains("\u00A7")) {
             return string;
-        } else if ((!jLine || !reader.getTerminal().isANSISupported()) && jTerminal == null) {
+        } else if ((!jLine || !reader.getTerminal().isAnsiSupported()) && jTerminal == null) {
             return ChatColor.stripColor(string);
         } else {
             return string.replace(ChatColor.RED.toString(), "\033[1;31m")
-                .replace(ChatColor.YELLOW.toString(), "\033[1;33m")
-                .replace(ChatColor.GREEN.toString(), "\033[1;32m")
-                .replace(ChatColor.AQUA.toString(), "\033[1;36m")
-                .replace(ChatColor.BLUE.toString(), "\033[1;34m")
-                .replace(ChatColor.LIGHT_PURPLE.toString(), "\033[1;35m")
-                .replace(ChatColor.BLACK.toString(), "\033[0;0m")
-                .replace(ChatColor.DARK_GRAY.toString(), "\033[1;30m")
-                .replace(ChatColor.DARK_RED.toString(), "\033[0;31m")
-                .replace(ChatColor.GOLD.toString(), "\033[0;33m")
-                .replace(ChatColor.DARK_GREEN.toString(), "\033[0;32m")
-                .replace(ChatColor.DARK_AQUA.toString(), "\033[0;36m")
-                .replace(ChatColor.DARK_BLUE.toString(), "\033[0;34m")
-                .replace(ChatColor.DARK_PURPLE.toString(), "\033[0;35m")
-                .replace(ChatColor.GRAY.toString(), "\033[0;37m")
-                .replace(ChatColor.WHITE.toString(), "\033[1;37m") +
-                "\033[0m";
+                    .replace(ChatColor.YELLOW.toString(), "\033[1;33m")
+                    .replace(ChatColor.GREEN.toString(), "\033[1;32m")
+                    .replace(ChatColor.AQUA.toString(), "\033[1;36m")
+                    .replace(ChatColor.BLUE.toString(), "\033[1;34m")
+                    .replace(ChatColor.LIGHT_PURPLE.toString(), "\033[1;35m")
+                    .replace(ChatColor.BLACK.toString(), "\033[0;0m")
+                    .replace(ChatColor.DARK_GRAY.toString(), "\033[1;30m")
+                    .replace(ChatColor.DARK_RED.toString(), "\033[0;31m")
+                    .replace(ChatColor.GOLD.toString(), "\033[0;33m")
+                    .replace(ChatColor.DARK_GREEN.toString(), "\033[0;32m")
+                    .replace(ChatColor.DARK_AQUA.toString(), "\033[0;36m")
+                    .replace(ChatColor.DARK_BLUE.toString(), "\033[0;34m")
+                    .replace(ChatColor.DARK_PURPLE.toString(), "\033[0;35m")
+                    .replace(ChatColor.GRAY.toString(), "\033[0;37m")
+                    .replace(ChatColor.WHITE.toString(), "\033[1;37m") +
+                    "\033[0m";
         }
     }
-    
+
     private class ConsoleCommandThread extends Thread {
         @Override
         public void run() {
@@ -190,10 +194,10 @@ public final class ConsoleManager {
                     } else {
                         command = reader.readLine();
                     }
-                    
+
                     if (command == null || command.trim().length() == 0)
                         continue;
-                    
+
                     server.getScheduler().scheduleSyncDelayedTask(null, new CommandTask(command.trim()));
                 }
                 catch (CommandException ex) {
@@ -206,21 +210,21 @@ public final class ConsoleManager {
             }
         }
     }
-    
+
     private class ServerShutdownThread extends Thread {
         @Override
         public void run() {
             server.shutdown();
         }
     }
-    
+
     private class CommandTask implements Runnable {
         private String command;
-        
+
         public CommandTask(String command) {
             this.command = command;
         }
-        
+
         public void run() {
             command = EventFactory.onServerCommand(sender, command).getCommand();
 
@@ -234,17 +238,17 @@ public final class ConsoleManager {
             }
         }
     }
-    
+
     private class ColoredCommandSender implements ConsoleCommandSender {
         private final PermissibleBase perm = new PermissibleBase(this);
 
         ////////////////////////////////////////////////////////////////////////
         // CommandSender
-        
+
         public String getName() {
             return "CONSOLE";
         }
-        
+
         public void sendMessage(String text) {
             server.getLogger().info(text);
         }
@@ -347,7 +351,7 @@ public final class ConsoleManager {
 
         }
     }
-    
+
     private class LoggerOutputStream extends ByteArrayOutputStream {
         private final String separator = System.getProperty("line.separator");
         private final Level level;
@@ -368,27 +372,27 @@ public final class ConsoleManager {
             }
         }
     }
-    
+
     private class FancyConsoleHandler extends ConsoleHandler {
         public FancyConsoleHandler() {
             if (jTerminal != null) {
                 setOutputStream(new TerminalOutputStream());
             }
         }
-        
+
         @Override
         public synchronized void flush() {
             try {
                 if (jLine && jTerminal == null) {
-                    reader.printString(ConsoleReader.RESET_LINE + "");
-                    reader.flushConsole();
+                    reader.print(ConsoleReader.RESET_LINE + "");
+                    reader.flush();
                     super.flush();
                     try {
                         reader.drawLine();
                     } catch (Throwable ex) {
-                        reader.getCursorBuffer().clearBuffer();
+                        reader.getCursorBuffer().clear();
                     }
-                    reader.flushConsole();
+                    reader.flush();
                 } else {
                     super.flush();
                 }
@@ -398,12 +402,12 @@ public final class ConsoleManager {
             }
         }
     }
-    
+
     private class RotatingFileHandler extends StreamHandler {
         private SimpleDateFormat date;
         private String logFile;
         private String filename;
-        
+
         public RotatingFileHandler(String logFile) {
             this.logFile = logFile;
             date = new SimpleDateFormat("yyyy-MM-dd");
@@ -415,7 +419,7 @@ public final class ConsoleManager {
                 ex.printStackTrace();
             }
         }
-        
+
         @Override
         public synchronized void flush() {
             if (!filename.equals(calculateFilename())) {
@@ -430,19 +434,19 @@ public final class ConsoleManager {
             }
             super.flush();
         }
-        
+
         private String calculateFilename() {
             return logFile.replace("%D", date.format(new Date()));
         }
     }
-    
+
     private class DateOutputFormatter extends Formatter {
         private final SimpleDateFormat date;
-        
+
         public DateOutputFormatter(SimpleDateFormat date) {
             this.date = date;
         }
-        
+
         @Override
         public String format(LogRecord record) {
             StringBuilder builder = new StringBuilder();
@@ -459,11 +463,11 @@ public final class ConsoleManager {
                 record.getThrown().printStackTrace(new PrintWriter(writer));
                 builder.append(writer.toString());
             }
-            
+
             return builder.toString();
         }
     }
-    
+
     private class JTerminalListener implements WindowListener, KeyListener {
         public void windowOpened(WindowEvent e) {}
         public void windowIconified(WindowEvent e) {}
@@ -473,7 +477,7 @@ public final class ConsoleManager {
         public void windowClosed(WindowEvent e) {}
         public void keyPressed(KeyEvent e) {}
         public void keyReleased(KeyEvent e) {}
-        
+
         public void windowClosing(WindowEvent e) {
             server.shutdown();
         }
@@ -491,18 +495,18 @@ public final class ConsoleManager {
 
     private class TerminalOutputStream extends ByteArrayOutputStream {
         private final String separator = System.getProperty("line.separator");
-        
+
         @Override
         public synchronized void flush() throws IOException {
             super.flush();
             String record = this.toString();
             super.reset();
-            
+
             if (record.length() > 0 && !record.equals(separator)) {
                 jTerminal.print(record);
                 jFrame.repaint();
             }
         }
     }
-    
+
 }

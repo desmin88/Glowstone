@@ -60,7 +60,7 @@ repositories {
 dependencies {
     compile group: 'org.bukkit', name: 'bukkit', version: ext.bukkitVersion
     compile 'com.flowpowered:flow-networking:0.1.0-SNAPSHOT'
-    compile 'jline:jline:0.9.94' 
+    compile 'jline:jline:2.6'
     compile 'org.xerial:sqlite-jdbc:3.7.2'
     compile 'mysql:mysql-connector-java:5.1.14'
     compile 'com.grahamedgecombe.jterminal:jterminal:1.0.1'

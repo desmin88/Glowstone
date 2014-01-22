@@ -11,6 +11,7 @@ public final class StatusRequestHandler implements MessageHandler<GlowSession, S
 
     @Override
     public void handle(GlowSession session, StatusRequestMessage message) {
+        System.out.println("handling status request");
         // eventually make this do real things
 
         JSONObject json = new JSONObject();

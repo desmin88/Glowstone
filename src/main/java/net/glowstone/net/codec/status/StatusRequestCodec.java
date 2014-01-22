@@ -10,6 +10,7 @@ public final class StatusRequestCodec implements Codec<StatusRequestMessage>{
 
     @Override
     public StatusRequestMessage decode(ByteBuf byteBuf) throws IOException {
+        System.out.println("Decoding status request");
         return new StatusRequestMessage();
     }
 

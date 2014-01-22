@@ -14,6 +14,7 @@ public final class StatusProtocol extends GlowProtocol {
 
     public StatusProtocol(GlowServer server) {
         super(server, "STATUS", 4);
+        System.out.println("new status protocol");
 
         registerMessage(INBOUND, StatusRequestMessage.class, StatusRequestCodec.class, StatusRequestHandler.class, 0x00);
         registerMessage(INBOUND, StatusPingMessage.class, StatusPingCodec.class, StatusPingHandler.class, 0x01);

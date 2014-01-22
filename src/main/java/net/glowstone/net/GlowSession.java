@@ -102,9 +102,10 @@ public final class GlowSession extends BasicSession {
      * @param channel The channel associated with this session.
      */
     public GlowSession(GlowServer server, Channel channel) {
+
         super(channel, new HandshakeProtocol(server));
         this.server = server;
-
+        System.out.println("new session");
     }
 
     /**
@@ -296,15 +297,7 @@ public final class GlowSession extends BasicSession {
 //                GlowServer.logger.warning("Message " + message + " was not handled");
 //            }
 
-            Class<Message> messageClass = (Class<Message>) message.getClass();
-            MessageHandler handler = (MessageHandler) getProtocol().getMessageHandle(messageClass);
-            if (handler != null) {
-                try {
-                    handler.handle(this, message);
-                } catch (Exception e) {
-                    getUncaughtExceptionHandler().uncaughtException(message, handler, e);
-                }
-            }
+            super.messageReceived(message);
             readTimeoutCounter = 0;
         }
 
@@ -330,6 +323,7 @@ public final class GlowSession extends BasicSession {
      * @param message The message.
      */
      public void messageReceived(Message message) {
+        System.out.println("test2");
         if (message instanceof HandshakeMessage) {
             // must handle immediately, because network reads are affected (a little hacky)
             super.messageReceived(message);
@@ -339,7 +333,8 @@ public final class GlowSession extends BasicSession {
     }
 
     public void setProtocol(GlowProtocol protocol) {
-        setProtocol(protocol);
+
+        super.setProtocol(protocol);
     }
 
     /**
@@ -370,4 +365,12 @@ public final class GlowSession extends BasicSession {
     public void setProcessor(MessageProcessor processor) {
         this.processor = processor;
     }
+
+    @Override
+    public void onThrowable(Throwable t) {
+        System.out.println("onthrowable");
+        t.printStackTrace();
+    }
+
+
 }

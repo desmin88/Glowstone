@@ -62,13 +62,16 @@ public final class EncryptionKeyResponseHandler implements MessageHandler<GlowSe
             return;
         }
 
-
-        BufferedBlockCipher cipher = SecurityUtils.generateBouncyCastleAESCipher();
+        BufferedBlockCipher encodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
         CipherParameters symmetricKey = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
-        cipher.init(false, symmetricKey);
+        encodeCipher.init(false, symmetricKey);
 
-        EncryptionChannelProcessor processor = new EncryptionChannelProcessor(cipher, 32);
-        session.set
+        BufferedBlockCipher decodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
+        CipherParameters symmetricKey2 = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
+        encodeCipher.init(true, symmetricKey2);
+
+        EncryptionChannelProcessor processor = new EncryptionChannelProcessor(encodeCipher, decodeCipher, 32);
+        session.setProcessor(processor);
 
         // todo: at this point, the stream encryption should be enabled
 

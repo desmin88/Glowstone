@@ -46,11 +46,15 @@ public abstract class GlowProtocol extends KeyedProtocol {
 
     @Override
     public Codec<?> readHeader(ByteBuf buf) throws UnknownPacketException {
+        System.out.println("Read header");
         int length = -1;
         int opcode = -1;
         try {
             length = ByteBufUtils.readVarInt(buf);
             opcode = ByteBufUtils.readVarInt(buf);
+            System.out.println("opcode" + opcode);
+            System.out.println("Codec registration: " + getCodecLookupService(INBOUND).find(opcode).getOpcode());
+            System.out.println("Codec name:" + getCodecLookupService(INBOUND).find(opcode).getCodec().getClass().getName());
             return getCodecLookupService(INBOUND).find(opcode).getCodec();
         } catch (IOException e) {
             throw new UnknownPacketException("Failed to read packet data (corrupt?)", opcode, length);
@@ -61,11 +65,13 @@ public abstract class GlowProtocol extends KeyedProtocol {
 
     @Override
     public <M extends Message> Codec.CodecRegistration getCodecRegistration(Class<M> clazz) {
+        System.out.println("Get codec");
         return getCodecLookupService(OUTBOUND).find(clazz);
     }
 
     @Override
     public ByteBuf writeHeader(Codec.CodecRegistration codec, ByteBuf data, ByteBuf out) {
+        System.out.println("write header");
         final int length = data.readableBytes();
         final ByteBuf opcodeBuffer = Unpooled.buffer();
         ByteBufUtils.writeVarInt(opcodeBuffer, codec.getOpcode());

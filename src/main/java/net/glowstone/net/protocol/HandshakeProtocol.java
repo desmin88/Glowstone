@@ -9,7 +9,7 @@ public final class HandshakeProtocol extends GlowProtocol {
 
     public HandshakeProtocol(GlowServer server) {
         super(server, "HANDSHAKE", 0);
-
+        System.out.println("create HS protocol");
         registerMessage(INBOUND, HandshakeMessage.class, HandshakeCodec.class, HandshakeHandler.class, 0x00);
     }
 }

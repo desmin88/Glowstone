@@ -1,64 +1,74 @@
 package net.glowstone.net;
 
-import com.flowpowered.networking.process.CommonChannelProcessor;
 import com.flowpowered.networking.processor.simple.SimpleMessageProcessor;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 
-import javax.crypto.Cipher;
-
 public class EncryptionChannelProcessor extends SimpleMessageProcessor {
 
-    private final BufferedBlockCipher cipher;
-    private final byte[] processed;
-    private int stored = 0;
-    private int position = 0;
+    private final BufferedBlockCipher cipherEncode;
+    private final BufferedBlockCipher cipherDecode;
 
-    public EncryptionChannelProcessor(BufferedBlockCipher cipher, int capacity) {
+    private final byte[] processedEncode;
+    private int storedEncode = 0;
+    private int positionEncode = 0;
+
+    private final byte[] processedDecode;
+    private int storedDecode = 0;
+    private int positionDecode = 0;
+
+    public EncryptionChannelProcessor(BufferedBlockCipher cipherEncode, BufferedBlockCipher cipherDecode, int capacity) {
         super(capacity);
-        this.cipher = cipher;
-        processed = new byte[capacity * 2];
+        this.cipherDecode = cipherDecode;
+        this.cipherEncode = cipherEncode;
+
+
+        processedEncode = new byte[capacity * 2];
+        processedDecode = new byte[capacity * 2];
     }
 
     @Override
-    protected void write(byte[] buf, int length) {
-        if (stored > position) {
+    protected void writeEncode(byte[] buf, int length) {
+        if (storedEncode > positionEncode) {
             throw new IllegalStateException("Stored data must be completely read before writing more data");
         }
-        stored = cipher.processBytes(buf, 0, length, processed, 0);
-        position = 0;
+        storedEncode = cipherEncode.processBytes(buf, 0, length, processedEncode, 0);
+        positionEncode = 0;
     }
 
     @Override
-    protected int read(byte[] buf) {
-        if (position >= stored) {
+    protected int readEncode(byte[] buf) {
+        if (positionEncode >= storedEncode) {
             return 0;
         } else {
-            int toRead = Math.min(buf.length, stored - position);
+            int toRead = Math.min(buf.length, storedEncode - positionEncode);
             for (int i = 0; i < toRead; i++) {
-                buf[i] = processed[position + i];
+                buf[i] = processedEncode[positionEncode + i];
             }
-            position += toRead;
+            positionEncode += toRead;
             return toRead;
         }
     }
 
     @Override
-    protected void writeEncode(byte[] buf, int length) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    protected int readEncode(byte[] buf) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     protected void writeDecode(byte[] buf, int length) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        if (storedDecode > positionDecode) {
+            throw new IllegalStateException("Stored data must be completely read before writing more data");
+        }
+        storedDecode = cipherDecode.processBytes(buf, 0, length, processedDecode, 0);
+        positionDecode = 0;
     }
 
     @Override
     protected int readDecode(byte[] buf) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        if (positionDecode >= storedDecode) {
+            return 0;
+        } else {
+            int toRead = Math.min(buf.length, storedDecode - positionDecode);
+            for (int i = 0; i < toRead; i++) {
+                buf[i] = processedEncode[positionDecode + i];
+            }
+            positionDecode += toRead;
+            return toRead;
+        }
     }
 }

@@ -14,7 +14,8 @@ public final class HandshakeCodec implements Codec<HandshakeMessage> {
         final int version = ByteBufUtils.readVarInt(buffer);
         final String address = ByteBufUtils.readUTF8(buffer);
         final short port = (short) buffer.readUnsignedShort();
-        final int state = buffer.readInt();
+        final int state = ByteBufUtils.readVarInt(buffer);
+
         return new HandshakeMessage(version, address, port, state);
     }
 
