@@ -68,7 +68,7 @@ public final class EncryptionKeyResponseHandler implements MessageHandler<GlowSe
         cipher.init(false, symmetricKey);
 
         EncryptionChannelProcessor processor = new EncryptionChannelProcessor(cipher, 32);
-        message.setProcessor(processor);
+        session.set
 
         // todo: at this point, the stream encryption should be enabled
 

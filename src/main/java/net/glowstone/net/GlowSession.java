@@ -2,6 +2,7 @@ package net.glowstone.net;
 
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
+import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.session.BasicSession;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -89,6 +90,11 @@ public final class GlowSession extends BasicSession {
      * vanilla client where duplicate packets are sent.
      */
     private BlockPlacementMessage previousPlacement;
+
+    /**
+     * The message processor used in encryption
+     */
+    private MessageProcessor processor;
 
     /**
      * Creates a new session.
@@ -356,4 +362,12 @@ public final class GlowSession extends BasicSession {
         }
     }
 
+    @Override
+    public MessageProcessor getProcessor() {
+        return processor;
+    }
+
+    public void setProcessor(MessageProcessor processor) {
+        this.processor = processor;
+    }
 }

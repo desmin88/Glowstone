@@ -1,11 +1,12 @@
 package net.glowstone.net;
 
 import com.flowpowered.networking.process.CommonChannelProcessor;
+import com.flowpowered.networking.processor.simple.SimpleMessageProcessor;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 
 import javax.crypto.Cipher;
 
-public class EncryptionChannelProcessor extends CommonChannelProcessor {
+public class EncryptionChannelProcessor extends SimpleMessageProcessor {
 
     private final BufferedBlockCipher cipher;
     private final byte[] processed;
@@ -39,5 +40,25 @@ public class EncryptionChannelProcessor extends CommonChannelProcessor {
             position += toRead;
             return toRead;
         }
+    }
+
+    @Override
+    protected void writeEncode(byte[] buf, int length) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected int readEncode(byte[] buf) {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected void writeDecode(byte[] buf, int length) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected int readDecode(byte[] buf) {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

@@ -1,13 +1,9 @@
 package net.glowstone.net.message.login;
 
-import com.flowpowered.networking.process.ChannelProcessor;
-import com.flowpowered.networking.process.DecodingProcessorHandler;
-import com.flowpowered.networking.process.ProcessorSetupMessage;
 
-public final class EncryptionKeyResponseMessage implements ProcessorSetupMessage {
+import com.flowpowered.networking.Message;
 
-    private ChannelProcessor processor;
-    private DecodingProcessorHandler handler;
+public final class EncryptionKeyResponseMessage implements Message {
 
     private final byte[] sharedSecret;
     private final byte[] verifyToken;
@@ -30,17 +26,4 @@ public final class EncryptionKeyResponseMessage implements ProcessorSetupMessage
         return false;
     }
 
-    public void setProcessor(ChannelProcessor processor) {
-        this.processor = processor;
-    }
-
-    @Override
-    public ChannelProcessor getProcessor() {
-        return processor;
-    }
-
-    @Override
-    public void setDecodingProcessorHandler(DecodingProcessorHandler handler) {
-        this.handler = handler;
-    }
 }
