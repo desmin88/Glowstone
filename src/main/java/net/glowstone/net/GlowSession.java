@@ -316,6 +316,11 @@ public final class GlowSession extends BasicSession {
             pingMessageId = random.nextInt();
             send(new PingMessage(pingMessageId));
         }
+
+        //read if we have autoread to false
+        if (!getChannel().config().isAutoRead()) {
+            getChannel().read();
+        }
     }
 
     /**
