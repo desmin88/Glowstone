@@ -1,6 +1,6 @@
 package net.glowstone.net.codec.login;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
 import net.glowstone.net.message.login.EncryptionKeyRequestMessage;
@@ -24,7 +24,7 @@ public final class EncryptionKeyRequestCodec implements Codec<EncryptionKeyReque
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, EncryptionKeyRequestMessage message) throws IOException {
+    public void encode(ByteBuf buf, EncryptionKeyRequestMessage message) throws IOException {
         ByteBufUtils.writeUTF8(buf, message.getSessionId());
 
         buf.writeShort(message.getPublicKey().length);
@@ -33,6 +33,6 @@ public final class EncryptionKeyRequestCodec implements Codec<EncryptionKeyReque
         buf.writeShort(message.getVerifyToken().length);
         buf.writeBytes(message.getVerifyToken());
 
-        return buf;
+
     }
 }

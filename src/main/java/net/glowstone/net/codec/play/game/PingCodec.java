@@ -14,8 +14,8 @@ public final class PingCodec implements Codec<PingMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, PingMessage message) throws IOException {
+    public void encode(ByteBuf buf, PingMessage message) throws IOException {
         buf.writeInt(message.getPingId());
-        return buf;
+
     }
 }

@@ -14,8 +14,8 @@ public final class PlayerUpdateCodec implements Codec<PlayerUpdateMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, PlayerUpdateMessage message) throws IOException {
+    public void encode(ByteBuf buf, PlayerUpdateMessage message) throws IOException {
         buf.writeByte(message.getOnGround() ? 1 : 0);
-        return buf;
+
     }
 }

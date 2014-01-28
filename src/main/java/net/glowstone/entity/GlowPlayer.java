@@ -155,7 +155,6 @@ public final class GlowPlayer extends GlowHumanEntity implements Player, Invento
         // send login response
         session.send(new LoginSuccessMessage(uuid.toString().replace("-", ""), name));
         session.setProtocol(new PlayProtocol(session.getServer()));
-        session.setOption(ChannelOption.AUTO_READ, true);
 
         // send join game
         // in future, handle hardcore, difficulty, and level type

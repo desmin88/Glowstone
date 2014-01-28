@@ -17,10 +17,10 @@ public final class TimeCodec implements Codec<TimeMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, TimeMessage message) throws IOException {
+    public void encode(ByteBuf buf, TimeMessage message) throws IOException {
         buf.writeLong(message.getWorldAge());
         buf.writeLong(message.getTime());
 
-        return buf;
+
     }
 }

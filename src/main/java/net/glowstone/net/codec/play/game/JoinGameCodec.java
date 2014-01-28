@@ -1,6 +1,6 @@
 package net.glowstone.net.codec.play.game;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
 import net.glowstone.net.message.play.game.JoinGameMessage;
@@ -21,7 +21,7 @@ public final class JoinGameCodec implements Codec<JoinGameMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, JoinGameMessage message) throws IOException {
+    public void encode(ByteBuf buf, JoinGameMessage message) throws IOException {
         buf.writeInt(message.getId());
         buf.writeByte(message.getGameMode());
         buf.writeByte(message.getDimension());
@@ -29,6 +29,6 @@ public final class JoinGameCodec implements Codec<JoinGameMessage> {
         buf.writeByte(message.getMaxPlayers());
         ByteBufUtils.writeUTF8(buf, message.getLevelType());
 
-        return buf;
+
     }
 }

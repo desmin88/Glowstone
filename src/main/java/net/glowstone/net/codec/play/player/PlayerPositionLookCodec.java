@@ -22,7 +22,7 @@ public final class PlayerPositionLookCodec implements Codec<PlayerPositionLookMe
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, PlayerPositionLookMessage message) throws IOException {
+    public void encode(ByteBuf buf, PlayerPositionLookMessage message) throws IOException {
         buf.writeDouble(message.getX());
         buf.writeDouble(message.getStance());
         buf.writeDouble(message.getY());
@@ -31,6 +31,6 @@ public final class PlayerPositionLookCodec implements Codec<PlayerPositionLookMe
         buf.writeFloat(message.getPitch());
         buf.writeByte(message.getOnGround() ? 1 : 0);
 
-        return buf;
+
     }
 }

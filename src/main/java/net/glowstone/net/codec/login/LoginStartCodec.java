@@ -1,6 +1,6 @@
 package net.glowstone.net.codec.login;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
 import net.glowstone.net.message.login.LoginStartMessage;
@@ -15,9 +15,9 @@ public final class LoginStartCodec implements Codec<LoginStartMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, LoginStartMessage message) throws IOException {
+    public void encode(ByteBuf buf, LoginStartMessage message) throws IOException {
         ByteBufUtils.writeUTF8(buf, message.getUsername());
 
-        return buf;
+
     }
 }

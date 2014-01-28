@@ -15,7 +15,6 @@ public final class StatusRequestCodec implements Codec<StatusRequestMessage>{
     }
 
     @Override
-    public ByteBuf encode(ByteBuf byteBuf, StatusRequestMessage statusRequestMessage) throws IOException {
-        return byteBuf;
+    public void encode(ByteBuf byteBuf, StatusRequestMessage statusRequestMessage) throws IOException {
     }
 }

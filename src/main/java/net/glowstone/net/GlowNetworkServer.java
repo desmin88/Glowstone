@@ -16,9 +16,8 @@ public class GlowNetworkServer extends NetworkServer {
 
     @Override
     public Session newSession(Channel c) {
-        System.out.println("newSession");
+        System.out.println("newSession in GlowNetworkServer called");
         GlowSession session = new GlowSession(server, c);
-        session.setOption(ChannelOption.AUTO_READ, false);
         server.getSessionRegistry().add(session);
 
         return session;

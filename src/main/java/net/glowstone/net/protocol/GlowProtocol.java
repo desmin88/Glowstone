@@ -1,6 +1,6 @@
 package net.glowstone.net.protocol;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
@@ -65,19 +65,18 @@ public abstract class GlowProtocol extends KeyedProtocol {
 
     @Override
     public <M extends Message> Codec.CodecRegistration getCodecRegistration(Class<M> clazz) {
-        System.out.println("Get codec");
+        System.out.println("Get codec registration for class: " + clazz.getName());
         return getCodecLookupService(OUTBOUND).find(clazz);
     }
 
     @Override
-    public ByteBuf writeHeader(Codec.CodecRegistration codec, ByteBuf data, ByteBuf out) {
-        System.out.println("write header");
+    public void writeHeader(ByteBuf out, Codec.CodecRegistration codec, ByteBuf data) {
+        System.out.println("Writing Header, opcode: " + codec.getOpcode());
         final int length = data.readableBytes();
         final ByteBuf opcodeBuffer = Unpooled.buffer();
         ByteBufUtils.writeVarInt(opcodeBuffer, codec.getOpcode());
         ByteBufUtils.writeVarInt(out, length + opcodeBuffer.readableBytes());
         ByteBufUtils.writeVarInt(out, codec.getOpcode());
-        return out;
     }
 
 

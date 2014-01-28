@@ -17,10 +17,10 @@ public final class PlayerLookCodec implements Codec<PlayerLookMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, PlayerLookMessage message) throws IOException {
+    public void encode(ByteBuf buf, PlayerLookMessage message) throws IOException {
         buf.writeFloat(message.getYaw());
         buf.writeFloat(message.getPitch());
         buf.writeByte(message.getOnGround() ? 1 : 0);
-        return buf;
+
     }
 }

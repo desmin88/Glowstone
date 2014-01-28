@@ -1,6 +1,6 @@
 package net.glowstone.net.codec.handshake;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
 import net.glowstone.net.message.handshake.HandshakeMessage;
@@ -20,11 +20,11 @@ public final class HandshakeCodec implements Codec<HandshakeMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, HandshakeMessage message) throws IOException {
+    public void encode(ByteBuf buf, HandshakeMessage message) throws IOException {
         ByteBufUtils.writeVarInt(buf, message.getVersion());
         ByteBufUtils.writeUTF8(buf, message.getAddress());
         buf.writeShort(message.getPort());
         buf.writeInt(message.getPort());
-        return buf;
+
     }
 }

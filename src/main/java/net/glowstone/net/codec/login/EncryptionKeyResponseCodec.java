@@ -20,13 +20,13 @@ public final class EncryptionKeyResponseCodec implements Codec<EncryptionKeyResp
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, EncryptionKeyResponseMessage message) throws IOException {
+    public void encode(ByteBuf buf, EncryptionKeyResponseMessage message) throws IOException {
         buf.writeShort(message.getSharedSecret().length);
         buf.writeBytes(message.getSharedSecret());
 
         buf.writeShort(message.getVerifyToken().length);
         buf.writeBytes(message.getVerifyToken());
 
-        return buf;
+
     }
 }

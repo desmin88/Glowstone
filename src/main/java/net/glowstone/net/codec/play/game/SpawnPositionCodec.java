@@ -18,11 +18,11 @@ public final class SpawnPositionCodec implements Codec<SpawnPositionMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, SpawnPositionMessage message) throws IOException {
+    public void encode(ByteBuf buf, SpawnPositionMessage message) throws IOException {
         buf.writeInt(message.getX());
         buf.writeInt(message.getY());
         buf.writeInt(message.getZ());
 
-        return buf;
+
     }
 }

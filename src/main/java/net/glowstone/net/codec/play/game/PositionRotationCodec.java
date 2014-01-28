@@ -21,7 +21,7 @@ public final class PositionRotationCodec implements Codec<PositionRotationMessag
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, PositionRotationMessage message) throws IOException {
+    public void encode(ByteBuf buf, PositionRotationMessage message) throws IOException {
         buf.writeDouble(message.getX());
         buf.writeDouble(message.getY());
         buf.writeDouble(message.getZ());
@@ -29,6 +29,6 @@ public final class PositionRotationCodec implements Codec<PositionRotationMessag
         buf.writeFloat(message.getPitch());
         buf.writeByte(message.isOnGround() ? 1 : 0);
 
-        return buf;
+
     }
 }

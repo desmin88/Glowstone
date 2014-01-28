@@ -1,6 +1,6 @@
 package net.glowstone.net.codec.play.game;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
 import net.glowstone.net.message.play.game.BlockChangeMessage;
@@ -21,13 +21,13 @@ public final class BlockChangeCodec implements Codec<BlockChangeMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, BlockChangeMessage message) throws IOException {
+    public void encode(ByteBuf buf, BlockChangeMessage message) throws IOException {
         buf.writeInt(message.getX());
         buf.writeInt(message.getY());
         buf.writeInt(message.getZ());
         ByteBufUtils.writeVarInt(buf, message.getType());
         buf.writeByte(message.getMetadata());
 
-        return buf;
+
     }
 }

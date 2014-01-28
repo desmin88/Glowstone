@@ -14,8 +14,7 @@ public final class StatusPingCodec implements Codec<StatusPingMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf byteBuf, StatusPingMessage statusPingMessage) throws IOException {
+    public void encode(ByteBuf byteBuf, StatusPingMessage statusPingMessage) throws IOException {
         byteBuf.writeLong(statusPingMessage.getTime());
-        return byteBuf;
     }
 }

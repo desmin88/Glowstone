@@ -15,7 +15,7 @@ public final class ChunkDataCodec implements Codec<ChunkDataMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, ChunkDataMessage message) throws IOException {
+    public void encode(ByteBuf buf, ChunkDataMessage message) throws IOException {
         buf.writeInt(message.getX());
         buf.writeInt(message.getZ());
         buf.writeByte(message.isContinuous() ? 1 : 0);
@@ -24,7 +24,7 @@ public final class ChunkDataCodec implements Codec<ChunkDataMessage> {
 
         if (message.getData().length == 0) {
             buf.writeInt(0);
-            return buf;
+            return;
         }
 
         byte[] compressedData = new byte[message.getData().length];
@@ -41,6 +41,6 @@ public final class ChunkDataCodec implements Codec<ChunkDataMessage> {
 
         buf.writeInt(compressed);
         buf.writeBytes(compressedData, 0, compressed);
-        return buf;
+
     }
 }

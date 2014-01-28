@@ -1,8 +1,6 @@
 package net.glowstone.net;
 
 import com.flowpowered.networking.Message;
-import com.flowpowered.networking.MessageHandler;
-import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.session.BasicSession;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -92,11 +90,6 @@ public final class GlowSession extends BasicSession {
     private BlockPlacementMessage previousPlacement;
 
     /**
-     * The message processor used in encryption
-     */
-    private MessageProcessor processor;
-
-    /**
      * Creates a new session.
      * @param server The server this session belongs to.
      * @param channel The channel associated with this session.
@@ -105,7 +98,7 @@ public final class GlowSession extends BasicSession {
 
         super(channel, new HandshakeProtocol(server));
         this.server = server;
-        System.out.println("new session");
+        System.out.println("GlowSession constructor called.");
     }
 
     /**
@@ -220,6 +213,7 @@ public final class GlowSession extends BasicSession {
      */
     public void send(Message message) {
         writeTimeoutCounter = 0;
+        System.out.println("Sending message:"  + message.getClass().getName());
         getChannel().write(message);
     }
 
@@ -316,11 +310,6 @@ public final class GlowSession extends BasicSession {
             pingMessageId = random.nextInt();
             send(new PingMessage(pingMessageId));
         }
-
-        //read if we have autoread to false
-        if (!getChannel().config().isAutoRead()) {
-            getChannel().read();
-        }
     }
 
     /**
@@ -328,7 +317,7 @@ public final class GlowSession extends BasicSession {
      * @param message The message.
      */
      public void messageReceived(Message message) {
-        System.out.println("test2");
+        System.out.println("Received message, name: " + message.getClass().getName());
         if (message instanceof HandshakeMessage) {
             // must handle immediately, because network reads are affected (a little hacky)
             super.messageReceived(message);
@@ -338,7 +327,7 @@ public final class GlowSession extends BasicSession {
     }
 
     public void setProtocol(GlowProtocol protocol) {
-
+        System.out.println("GlowSession#SetProtocol, new protocol name: " + protocol.getClass().getName());
         super.setProtocol(protocol);
     }
 
@@ -360,15 +349,6 @@ public final class GlowSession extends BasicSession {
             }
             player = null; // in case we are disposed twice
         }
-    }
-
-    @Override
-    public MessageProcessor getProcessor() {
-        return processor;
-    }
-
-    public void setProcessor(MessageProcessor processor) {
-        this.processor = processor;
     }
 
     @Override

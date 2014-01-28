@@ -1,6 +1,6 @@
 package net.glowstone.net.codec.play.game;
 
-import com.flowpowered.networking.ByteBufUtils;
+import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
 import net.glowstone.net.message.play.game.IncomingChatMessage;
@@ -15,8 +15,8 @@ public final class IncomingChatCodec implements Codec<IncomingChatMessage> {
     }
 
     @Override
-    public ByteBuf encode(ByteBuf buf, IncomingChatMessage message) throws IOException {
+    public void encode(ByteBuf buf, IncomingChatMessage message) throws IOException {
         ByteBufUtils.writeUTF8(buf, message.getText());
-        return buf;
+
     }
 }
