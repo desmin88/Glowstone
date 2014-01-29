@@ -4,6 +4,7 @@ import com.flowpowered.networking.MessageHandler;
 import net.glowstone.GlowServer;
 import net.glowstone.entity.GlowPlayer;
 //import net.glowstone.net.EncryptionChannelProcessor;
+import net.glowstone.net.EncryptionChannelProcessor;
 import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.login.EncryptionKeyResponseMessage;
 import net.glowstone.util.SecurityUtils;
@@ -62,16 +63,16 @@ public final class EncryptionKeyResponseHandler implements MessageHandler<GlowSe
             return;
         }
 
-//        BufferedBlockCipher encodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
-//        CipherParameters symmetricKey = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
-//        encodeCipher.init(false, symmetricKey);
-//
-//        BufferedBlockCipher decodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
-//        CipherParameters symmetricKey2 = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
-//        encodeCipher.init(true, symmetricKey2);
-//
-//        EncryptionChannelProcessor processor = new EncryptionChannelProcessor(encodeCipher, decodeCipher, 32);
-//        session.setProcessor(processor);
+        BufferedBlockCipher encodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
+        CipherParameters symmetricKey = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
+        encodeCipher.init(false, symmetricKey);
+
+        BufferedBlockCipher decodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
+        CipherParameters symmetricKey2 = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
+        encodeCipher.init(true, symmetricKey2);
+
+        EncryptionChannelProcessor processor = new EncryptionChannelProcessor(encodeCipher, decodeCipher, 32);
+        session.setProcessor(processor);
 
         // todo: at this point, the stream encryption should be enabled
 
