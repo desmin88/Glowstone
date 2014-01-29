@@ -1,12 +1,8 @@
 package net.glowstone.net;
 
-import com.flowpowered.networking.processor.simple.SimpleMessageProcessor;
-import net.glowstone.GlowServer;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 
-import java.util.Arrays;
-
-public class EncryptionChannelProcessor extends SimpleMessageProcessor {
+public class EncryptionChannelProcessor extends FixedSimpleMessageProcessor {
 
     private CryptBuf encodeBuf;
     private CryptBuf decodeBuf;
@@ -19,25 +15,21 @@ public class EncryptionChannelProcessor extends SimpleMessageProcessor {
 
     @Override
     protected void writeEncode(byte[] buf, int length) {
-        GlowServer.logger.info("writeEncode: " + Arrays.toString(buf));
         encodeBuf.write(buf, length);
     }
 
     @Override
     protected int readEncode(byte[] buf) {
-        GlowServer.logger.info("readEncode");
         return encodeBuf.read(buf);
     }
 
     @Override
     protected void writeDecode(byte[] buf, int length) {
-        GlowServer.logger.info("writeDecode");
         decodeBuf.write(buf, length);
     }
 
     @Override
     protected int readDecode(byte[] buf) {
-        GlowServer.logger.info("readDecode");
         return decodeBuf.read(buf);
     }
 
