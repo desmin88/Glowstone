@@ -1,16 +1,28 @@
 package net.glowstone.net;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class EncryptionChannelProcessor extends FixedSimpleMessageProcessor {
 
     private CryptBuf encodeBuf;
     private CryptBuf decodeBuf;
 
-    public EncryptionChannelProcessor(BufferedBlockCipher cipherEncode, BufferedBlockCipher cipherDecode, int capacity) {
+    public EncryptionChannelProcessor(byte[] sharedSecret, int capacity) {
         super(capacity);
-        this.encodeBuf = new CryptBuf(cipherDecode, capacity * 2);
-        this.decodeBuf = new CryptBuf(cipherEncode, capacity * 2);
+
+        CipherParameters parameters = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
+        BufferedBlockCipher encode = new BufferedBlockCipher(new CFBBlockCipher(new AESEngine(), 8));
+        BufferedBlockCipher decode = new BufferedBlockCipher(new CFBBlockCipher(new AESEngine(), 8));
+        encode.init(true, parameters);
+        decode.init(false, parameters);
+
+        this.encodeBuf = new CryptBuf(encode, capacity * 2);
+        this.decodeBuf = new CryptBuf(decode, capacity * 2);
     }
 
     @Override
