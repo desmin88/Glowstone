@@ -112,27 +112,27 @@ public class ServerConfig {
     }
 
     public void set(Key key, Object value) {
-        GlowServer.logger.info("config: set " + key + " = " + value);
+        //GlowServer.logger.info("config: set " + key + " = " + value);
         config.set(key.path, value);
     }
 
     public String getString(Key key) {
-        GlowServer.logger.info("config: getString " + key);
+        //GlowServer.logger.info("config: getString " + key);
         return config.getString(key.path);
     }
 
     public int getInt(Key key) {
-        if (key != Key.VIEW_DISTANCE) GlowServer.logger.info("config: getInt " + key);
+        //if (key != Key.VIEW_DISTANCE) GlowServer.logger.info("config: getInt " + key);
         return config.getInt(key.path);
     }
 
     public boolean getBoolean(Key key) {
-        GlowServer.logger.info("config: getBoolean " + key);
+        //GlowServer.logger.info("config: getBoolean " + key);
         return config.getBoolean(key.path);
     }
 
     public ConfigurationSection getSection(String section) {
-        GlowServer.logger.info("config: getSection " + section);
+        //GlowServer.logger.info("config: getSection " + section);
         return config.getConfigurationSection(section);
     }
 

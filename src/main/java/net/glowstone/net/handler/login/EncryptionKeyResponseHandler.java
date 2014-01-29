@@ -69,10 +69,11 @@ public final class EncryptionKeyResponseHandler implements MessageHandler<GlowSe
 
         BufferedBlockCipher decodeCipher = SecurityUtils.generateBouncyCastleAESCipher();
         CipherParameters symmetricKey2 = new ParametersWithIV(new KeyParameter(sharedSecret), sharedSecret);
-        encodeCipher.init(true, symmetricKey2);
+        decodeCipher.init(true, symmetricKey2);
 
         EncryptionChannelProcessor processor = new EncryptionChannelProcessor(encodeCipher, decodeCipher, 32);
         session.setProcessor(processor);
+        GlowServer.logger.info("Encryption processor enabled");
 
         // todo: at this point, the stream encryption should be enabled
 
