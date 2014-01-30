@@ -8,8 +8,6 @@ import net.glowstone.net.message.JsonMessage;
 import java.io.IOException;
 
 public final class JsonCodec implements Codec<JsonMessage> {
-
-
     @Override
     public JsonMessage decode(ByteBuf buffer) throws IOException {
         return new JsonMessage(ByteBufUtils.readUTF8(buffer));
@@ -17,8 +15,6 @@ public final class JsonCodec implements Codec<JsonMessage> {
 
     @Override
     public void encode(ByteBuf buf, JsonMessage message) throws IOException {
-        System.out.println("Encoding json: " + message.getJson());
         ByteBufUtils.writeUTF8(buf, message.getJson());
-        System.out.println("Encoding after");
     }
 }
