@@ -5,7 +5,7 @@ import com.flowpowered.networking.exception.UnknownPacketException;
 import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.session.BasicSession;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.DecoderException;
 import net.glowstone.EventFactory;
 import net.glowstone.GlowServer;
@@ -14,6 +14,7 @@ import net.glowstone.msg.BlockPlacementMessage;
 import net.glowstone.net.message.KickMessage;
 import net.glowstone.net.message.handshake.HandshakeMessage;
 import net.glowstone.net.message.play.game.BlockChangeMessage;
+import net.glowstone.net.message.play.game.ChatMessage;
 import net.glowstone.net.message.play.game.PingMessage;
 import net.glowstone.net.protocol.GlowProtocol;
 import net.glowstone.net.protocol.HandshakeProtocol;
@@ -218,19 +219,22 @@ public final class GlowSession extends BasicSession {
      * Sends a message to the client.
      * @param message The message.
      */
-    public void send(Message message) {
+    @Override
+    public ChannelFuture sendWithFuture(Message message) {
         if (message instanceof BlockChangeMessage)
-            return;
+            return null;
 
         writeTimeoutCounter = 0;
 
         try {
-            super.send(message);
-            GlowServer.logger.info("Sent message: " + message.getClass().getName());
+            ChannelFuture result = super.sendWithFuture(message);
+            GlowServer.logger.info("Sent message: " + message);
+            return result;
         } catch (IllegalStateException ex) {
             // for now, a warning, but we may need to someday silently discard this
-            GlowServer.logger.warning("Tried to send message after close: " + message.getClass().getName());
+            GlowServer.logger.warning("Tried to send message after close: " + message);
         }
+        return null;
     }
 
     /**
@@ -238,12 +242,13 @@ public final class GlowSession extends BasicSession {
      */
     @Deprecated
     public void send(net.glowstone.msg.Message message) {
-        GlowServer.logger.info("Send [LEGACY] " + message.getClass().getName());
+        GlowServer.logger.info("Send [LEGACY] " + message.getClass().getSimpleName());
     }
 
     @Override
     public void disconnect() {
-        disconnect("Internal error.");
+        GlowServer.logger.log(Level.WARNING, "Internal disconnect call", new Throwable());
+        disconnect("Internal error.", true);
     }
 
     /**
@@ -261,7 +266,7 @@ public final class GlowSession extends BasicSession {
      * KickMessage to be sent. When it has been delivered, the channel
      * is closed.
      * @param reason The reason for disconnection.
-     * @param overrideKick Whether to override the kick event.
+     * @param overrideKick Whether to skip the kick event.
      */
     public void disconnect(String reason, boolean overrideKick) {
         if (player != null && !overrideKick) {
@@ -273,26 +278,48 @@ public final class GlowSession extends BasicSession {
             reason = event.getReason();
 
             if (event.getLeaveMessage() != null) {
+                GlowServer.logger.info("broadcasting kick msg");
                 server.broadcastMessage(event.getLeaveMessage());
             }
-            
+        }
+
+        if (player != null) {
             GlowServer.logger.log(Level.INFO, "Player {0} kicked: {1}", new Object[]{player.getName(), reason});
-            dispose(false);
+        } else {
+            GlowServer.logger.log(Level.INFO, "{0} kicked: {1}", new Object[]{getChannel().remoteAddress(), reason});
         }
 
         if (getProtocol() instanceof HandshakeProtocol || getProtocol() instanceof StatusProtocol) {
+            GlowServer.logger.log(Level.INFO, "Closing channel directly");
             // No KickMessage in these states
             getChannel().close();
         } else {
+            GlowServer.logger.log(Level.INFO, "Sending kick message");
             JSONObject json = new JSONObject();
             json.put("text", reason);
-            sendWithFuture(new KickMessage(json)).addListener(ChannelFutureListener.CLOSE);
+            sendWithFuture(new ChatMessage(json));//.addListener(ChannelFutureListener.CLOSE);
+            sendWithFuture(new KickMessage(json));//.addListener(ChannelFutureListener.CLOSE);
+            sendWithFuture(new ChatMessage(json));//.addListener(ChannelFutureListener.CLOSE);
         }
     }
 
     @Override
     public void onDisconnect() {
-        dispose(true);
+        GlowServer.logger.info("onDisconnect");
+        if (player != null) {
+            player.remove();
+            /*Message userListMessage = new UserListItemMessage(player.getPlayerListName(), false, (short)0);
+            for (Player player : server.getOnlinePlayers()) {
+                ((GlowPlayer) player).getSession().send(userListMessage);
+            }*/
+
+            String text = EventFactory.onPlayerQuit(player).getQuitMessage();
+            if (text != null) {
+                GlowServer.logger.info("broadcasting quit msg");
+                server.broadcastMessage(text);
+            }
+            player = null; // in case we are disposed twice
+        }
     }
 
     @Override
@@ -355,26 +382,6 @@ public final class GlowSession extends BasicSession {
     public void setProtocol(GlowProtocol protocol) {
         GlowServer.logger.info("Setting protocol: " + protocol.getClass().getName());
         super.setProtocol(protocol);
-    }
-
-    /**
-     * Disposes of this session by destroying the associated player, if there is
-     * one.
-     */
-    void dispose(boolean broadcastQuit) {
-        if (player != null) {            
-            player.remove();
-            /*Message userListMessage = new UserListItemMessage(player.getPlayerListName(), false, (short)0);
-            for (Player player : server.getOnlinePlayers()) {
-                ((GlowPlayer) player).getSession().send(userListMessage);
-            }*/
-
-            String text = EventFactory.onPlayerQuit(player).getQuitMessage();
-            if (broadcastQuit && text != null) {
-                server.broadcastMessage(text);
-            }
-            player = null; // in case we are disposed twice
-        }
     }
 
     @Override

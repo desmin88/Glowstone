@@ -12,8 +12,4 @@ public final class KickMessage extends JsonMessage {
         super(json);
     }
 
-    @Override
-    public boolean isAsync() {
-        return false;
-    }
 }

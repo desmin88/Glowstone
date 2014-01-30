@@ -1,6 +1,5 @@
 package net.glowstone.entity;
 
-import io.netty.channel.ChannelOption;
 import net.glowstone.EventFactory;
 import net.glowstone.GlowChunk;
 import net.glowstone.GlowOfflinePlayer;
@@ -187,6 +186,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player, Invento
         saveData();
         getInventory().removeViewer(this);
         getInventory().getCraftingInventory().removeViewer(this);
+        permissions.clearPermissions();
         super.remove();
     }
 

@@ -3,6 +3,7 @@ package net.glowstone.net.codec;
 import com.flowpowered.networking.util.ByteBufUtils;
 import com.flowpowered.networking.Codec;
 import io.netty.buffer.ByteBuf;
+import net.glowstone.GlowServer;
 import net.glowstone.net.message.JsonMessage;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ public final class JsonCodec implements Codec<JsonMessage> {
 
     @Override
     public void encode(ByteBuf buf, JsonMessage message) throws IOException {
+        GlowServer.logger.info("Encoding JsonMessage: " + message);
         ByteBufUtils.writeUTF8(buf, message.getJson());
     }
 }
