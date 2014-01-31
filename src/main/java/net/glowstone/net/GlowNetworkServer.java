@@ -15,16 +15,13 @@ public class GlowNetworkServer extends NetworkServer {
 
     @Override
     public Session newSession(Channel c) {
-        GlowServer.logger.info("GlowNetworkServer # newSession");
         GlowSession session = new GlowSession(server, c);
         server.getSessionRegistry().add(session);
-
         return session;
     }
 
     @Override
     public void sessionInactivated(Session session) {
-        GlowServer.logger.info("GlowNetworkServer # sessionInactivated");
         server.getSessionRegistry().remove((GlowSession) session);
     }
 

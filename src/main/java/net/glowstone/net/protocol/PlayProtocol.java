@@ -18,7 +18,6 @@ import net.glowstone.net.message.play.player.PlayerPositionMessage;
 import net.glowstone.net.message.play.player.PlayerUpdateMessage;
 
 public final class PlayProtocol extends GlowProtocol {
-
     public PlayProtocol(GlowServer server) {
         super(server, "PLAY", 0x43);
 

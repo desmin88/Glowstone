@@ -32,7 +32,11 @@ public abstract class GlowProtocol extends KeyedProtocol {
 
     @Override
     public <M extends Message> MessageHandler<?, M> getMessageHandle(Class<M> clazz) {
-        return getHandlerLookupService(INBOUND).find(clazz);
+        MessageHandler<?, M> handler = getHandlerLookupService(INBOUND).find(clazz);
+        if (handler == null) {
+            GlowServer.logger.warning("No message handler for: " + clazz.getSimpleName());
+        }
+        return handler;
     }
 
     @Override
@@ -41,12 +45,6 @@ public abstract class GlowProtocol extends KeyedProtocol {
         int opcode = -1;
         try {
             length = ByteBufUtils.readVarInt(buf);
-
-            if (buf.readableBytes() < length) {
-                // give up now, to save work for replaying decoder later.
-                // in the future, use a real frame decoder
-                throw new IndexOutOfBoundsException();
-            }
 
             // mark point before opcode
             buf.markReaderIndex();

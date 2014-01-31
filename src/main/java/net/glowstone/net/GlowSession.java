@@ -1,6 +1,7 @@
 package net.glowstone.net;
 
 import com.flowpowered.networking.Message;
+import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.exception.UnknownPacketException;
 import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.session.BasicSession;
@@ -13,7 +14,6 @@ import net.glowstone.GlowServer;
 import net.glowstone.entity.GlowPlayer;
 import net.glowstone.msg.BlockPlacementMessage;
 import net.glowstone.net.message.KickMessage;
-import net.glowstone.net.message.play.game.BlockChangeMessage;
 import net.glowstone.net.message.play.game.PingMessage;
 import net.glowstone.net.protocol.GlowProtocol;
 import net.glowstone.net.protocol.HandshakeProtocol;
@@ -98,7 +98,7 @@ public final class GlowSession extends BasicSession {
 
     /**
      * Creates a new session.
-     * @param server The server this session belongs to.
+     * @param server  The server this session belongs to.
      * @param channel The channel associated with this session.
      */
     public GlowSession(GlowServer server, Channel channel) {
@@ -185,7 +185,7 @@ public final class GlowSession extends BasicSession {
      * Sets the player associated with this session.
      * @param player The new player.
      * @throws IllegalStateException if there is already a player associated
-     * with this session.
+     *                               with this session.
      */
     public void setPlayer(GlowPlayer player) {
         if (this.player != null)
@@ -199,6 +199,8 @@ public final class GlowSession extends BasicSession {
             return;
         }
         player.getWorld().getRawPlayers().add(player);
+
+        GlowServer.logger.info(player.getName() + " [" + getAddress() + "] connected, UUID: " + player.getUniqueId());
 
         // message and user list
         String message = EventFactory.onPlayerJoin(player).getJoinMessage();
@@ -218,18 +220,12 @@ public final class GlowSession extends BasicSession {
      */
     @Override
     public ChannelFuture sendWithFuture(Message message) {
-        if (message instanceof BlockChangeMessage)
-            return null;
-
         writeTimeoutCounter = 0;
-
-        try {
-            return super.sendWithFuture(message);
-        } catch (IllegalStateException ex) {
-            // for now, a warning, but we may need to someday silently discard this
-            GlowServer.logger.warning("Tried to send message after close: " + message);
+        if (!getChannel().isActive()) {
+            // discard messages sent if we're closed, since this happens a lot
+            return null;
         }
-        return null;
+        return super.sendWithFuture(message);
     }
 
     /**
@@ -242,8 +238,7 @@ public final class GlowSession extends BasicSession {
 
     @Override
     public void disconnect() {
-        GlowServer.logger.log(Level.WARNING, "Disconnect error in flow-networking", new Throwable());
-        disconnect("Internal server error.", true);
+        disconnect("No reason specified.");
     }
 
     /**
@@ -255,7 +250,7 @@ public final class GlowSession extends BasicSession {
     public void disconnect(String reason) {
         disconnect(reason, false);
     }
-    
+
     /**
      * Disconnects the session with the specified reason. This causes a
      * KickMessage to be sent. When it has been delivered, the channel
@@ -263,7 +258,7 @@ public final class GlowSession extends BasicSession {
      * @param reason The reason for disconnection.
      * @param overrideKick Whether to skip the kick event.
      */
-    public void disconnect(String reason, boolean overrideKick) {
+    private void disconnect(String reason, boolean overrideKick) {
         if (player != null && !overrideKick) {
             PlayerKickEvent event = EventFactory.onPlayerKick(player, reason);
             if (event.isCancelled()) {
@@ -277,12 +272,14 @@ public final class GlowSession extends BasicSession {
             }
         }
 
+        // log that the player was kicked
         if (player != null) {
             GlowServer.logger.log(Level.INFO, "Player {0} kicked: {1}", new Object[]{player.getName(), reason});
         } else {
-            GlowServer.logger.log(Level.INFO, "[{0}] kicked: {1}", new Object[]{getChannel().remoteAddress(), reason});
+            GlowServer.logger.log(Level.INFO, "[{0}] kicked: {1}", new Object[]{getAddress(), reason});
         }
 
+        // perform the kick, sending a kick message if possible
         if (getProtocol().getCodecRegistration(KickMessage.class) == null) {
             getChannel().close();
         } else {
@@ -292,7 +289,6 @@ public final class GlowSession extends BasicSession {
 
     @Override
     public void onDisconnect() {
-        GlowServer.logger.info("onDisconnect");
         if (player != null) {
             player.remove();
             /*Message userListMessage = new UserListItemMessage(player.getPlayerListName(), false, (short)0);
@@ -300,17 +296,14 @@ public final class GlowSession extends BasicSession {
                 ((GlowPlayer) player).getSession().send(userListMessage);
             }*/
 
+            GlowServer.logger.info(player.getName() + " [" + getAddress() + "] lost connection");
+
             String text = EventFactory.onPlayerQuit(player).getQuitMessage();
             if (text != null) {
                 server.broadcastMessage(text);
             }
             player = null; // in case we are disposed twice
         }
-    }
-
-    @Override
-    public String toString() {
-        return GlowSession.class.getName() + " [address=" + getChannel().remoteAddress() + "]";
     }
 
     /**
@@ -362,7 +355,6 @@ public final class GlowSession extends BasicSession {
     }
 
     public void setProtocol(GlowProtocol protocol) {
-        GlowServer.logger.info("Setting protocol: " + protocol.getClass().getName());
         super.setProtocol(protocol);
     }
 
@@ -382,6 +374,11 @@ public final class GlowSession extends BasicSession {
     @Override
     public void onOutboundThrowable(Throwable t) {
         GlowServer.logger.log(Level.SEVERE, "Error in network output", t);
+    }
+
+    @Override
+    public void onHandlerThrowable(Message message, MessageHandler<?, ?> handle, Throwable t) {
+        GlowServer.logger.log(Level.SEVERE, "Error while handling " + message + " (handler: " + handle.getClass().getSimpleName() + ")", t);
     }
 
     public void setProcessor(MessageProcessor processor) {
